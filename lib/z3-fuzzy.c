@@ -50,7 +50,7 @@
 #define ENABLE_AGGRESSIVE_OPTIMISTIC
 #define AVOID_GD_FALLBACK 0
 
-static int log_query_stats = 0;
+static int log_query_stats = 1;
 static int skip_notify     = 0;
 
 static int skip_reuse                   = 1;
@@ -143,7 +143,7 @@ static ast_data_t     ast_data            = {0};
 static char           notify_count        = 0;
 static unsigned long  g_prev_num_evaluate = 0;
 
-static char* query_log_filename = "/tmp/fuzzy-log-info.csv";
+static char* query_log_filename = "/home/clustfuzz/Documents/fuzzy-sat/fuzzy-log-info.csv";
 FILE*        query_log;
 
 static char interesting8[] = {
@@ -944,6 +944,7 @@ void z3fuzz_init(fuzzy_ctx_t* fctx, Z3_context ctx, char* seed_filename,
                                         size_t, uint32_t*),
                  unsigned timeout)
 {
+    printf("[log] call z3fuzz_init(...)\n");
     memset((void*)&fctx->stats, 0, sizeof(fuzzy_stats_t));
 
     if (timeout != 0) {
@@ -1011,6 +1012,7 @@ void z3fuzz_init(fuzzy_ctx_t* fctx, Z3_context ctx, char* seed_filename,
 fuzzy_ctx_t* z3fuzz_create(Z3_context ctx, char* seed_filename,
                            unsigned timeout)
 {
+    printf("[log] call z3fuzz_create(...)\n");
     fuzzy_ctx_t* res = (fuzzy_ctx_t*)malloc(sizeof(fuzzy_ctx_t));
     ASSERT_OR_ABORT(res, "z3fuzz_create(): failed malloc");
 
@@ -1044,6 +1046,7 @@ __attribute__((destructor)) static void release_global_context()
 
 void z3fuzz_free(fuzzy_ctx_t* ctx)
 {
+    printf("[log] call z3fuzz_free(...)\n");
     free(ctx->timer);
     free_testcase_list(ctx->z3_ctx, &ctx->testcases);
 
@@ -7563,6 +7566,8 @@ int z3fuzz_query_check_light(fuzzy_ctx_t* ctx, Z3_ast query,
                              unsigned char const** proof,
                              unsigned long*        proof_size)
 {
+    printf("[log] call z3fuzz_query_check_light(...)\n");
+
     Z3_inc_ref(ctx->z3_ctx, query);
     Z3_inc_ref(ctx->z3_ctx, branch_condition);
 
@@ -7597,6 +7602,8 @@ int z3fuzz_query_check_light(fuzzy_ctx_t* ctx, Z3_ast query,
 
 void z3fuzz_add_assignment(fuzzy_ctx_t* ctx, int idx, Z3_ast assignment_value)
 {
+    printf("[log] call z3fuzz_add_assignment(...)\n");
+    
     if (idx >= ctx->size_assignments) {
         unsigned old_size     = ctx->size_assignments;
         ctx->size_assignments = (idx + 1) * 3 / 2;
@@ -7730,6 +7737,8 @@ unsigned long z3fuzz_maximize(fuzzy_ctx_t* ctx, Z3_ast pi, Z3_ast to_maximize,
                               unsigned char const** out_values,
                               unsigned long*        out_len)
 {
+    printf("[log] call z3fuzz_maximize(...)\n");
+
     Z3_inc_ref(ctx->z3_ctx, pi);
 
     memcpy(tmp_input, ctx->testcases.data[0].values,
@@ -7818,6 +7827,8 @@ unsigned long z3fuzz_minimize(fuzzy_ctx_t* ctx, Z3_ast pi, Z3_ast to_minimize,
                               unsigned char const** out_values,
                               unsigned long*        out_len)
 {
+    printf("[log] call z3fuzz_minimize(...)\n");
+
     Z3_inc_ref(ctx->z3_ctx, pi);
     memcpy(tmp_input, ctx->testcases.data[0].values,
            ctx->testcases.data[0].values_len * sizeof(unsigned long));
@@ -7890,6 +7901,8 @@ void z3fuzz_find_all_values(fuzzy_ctx_t* ctx, Z3_ast expr, Z3_ast pi,
                                 unsigned char const* out_bytes,
                                 unsigned long out_bytes_len, unsigned long val))
 {
+    printf("[log] call z3fuzz_find_all_values(...)\n");
+
     Z3_inc_ref(ctx->z3_ctx, pi);
     Z3_inc_ref(ctx->z3_ctx, expr);
 
@@ -8133,6 +8146,8 @@ void z3fuzz_find_all_values_gd(
                                     unsigned long        out_bytes_len,
                                     unsigned long        val))
 {
+    printf("[log] call z3fuzz_find_all_gd(...)\n");
+
     Z3_inc_ref(ctx->z3_ctx, expr);
     Z3_inc_ref(ctx->z3_ctx, pi);
 
@@ -8233,6 +8248,8 @@ OUT_2:
 
 void z3fuzz_notify_constraint(fuzzy_ctx_t* ctx, Z3_ast constraint)
 {
+    printf("[log] call z3fuzz_notify_constraints(...)\n");
+    
     // this is a visit of the AST of the constraint... Too slow? I don't know
     if (unlikely(skip_notify))
         return;
@@ -8295,6 +8312,8 @@ void z3fuzz_notify_constraint(fuzzy_ctx_t* ctx, Z3_ast constraint)
 int z3fuzz_get_optimistic_sol(fuzzy_ctx_t* ctx, unsigned char const** proof,
                               unsigned long* proof_size)
 {
+    printf("[log] call z3fuzz_get_optimistic_sol(...)\n");
+    
     if (opt_found) {
         testcase_t* t = &ctx->testcases.data[0];
         *proof_size   = t->testcase_len;
@@ -8306,6 +8325,8 @@ int z3fuzz_get_optimistic_sol(fuzzy_ctx_t* ctx, unsigned char const** proof,
 void z3fuzz_dump_proof(fuzzy_ctx_t* ctx, const char* filename,
                        unsigned char const* proof, unsigned long proof_size)
 {
+    printf("[log] call z3fuzz_dump_proof(...)\n");
+
     FILE* fp = fopen(filename, "w");
     ASSERT_OR_ABORT(fp != NULL, "z3fuzz_dump_proof() open failed");
 
@@ -8332,6 +8353,8 @@ unsigned long z3fuzz_evaluate_expression(fuzzy_ctx_t* ctx, Z3_ast value,
 unsigned long z3fuzz_evaluate_expression_z3(fuzzy_ctx_t* ctx, Z3_ast query,
                                             Z3_ast* values)
 {
+    printf("[log] call z3fuzz_evaluate_expression_z3(...)\n");
+
     // evaluate query using [input <- input_val] as interpretation
 
     // build a model and assign an interpretation for the input symbols
